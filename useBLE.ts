@@ -10,6 +10,7 @@ import {
 import { Buffer } from 'buffer';
 
 import * as ExpoDevice from "expo-device";
+import { useBluetooth } from "./src/context/Bluetoothcontext";
 
 import base64 from "react-native-base64";
 
@@ -32,8 +33,9 @@ interface BluetoothLowEnergyApi {
 
 function useBLE(): BluetoothLowEnergyApi {
   const bleManager = useMemo(() => new BleManager(), []);
+  const { connectedDevice, setConnectedDevice } = useBluetooth();
   const [allDevices, setAllDevices] = useState<Device[]>([]);
-  const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
+  //const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
   const [heartRate, setHeartRate] = useState<number>(0);
 
   const [isScanning, setIsScanning] = useState(false);
