@@ -19,7 +19,7 @@ const StackComponent = () => {
   return (
     <NavigationContainer>
       <BluetoothProvider>
-        <Stack.Navigator initialRouteName="Login">
+        <Stack.Navigator initialRouteName="ble">
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
           <Stack.Screen name="ble" component={BleWindow2} options={{ headerTitle: LogoTitle, headerBackVisible: false }} />
         </Stack.Navigator>

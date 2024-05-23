@@ -19,6 +19,7 @@ const BleWindow2 = () => {
         disconnectFromDevice,
         sendDataToBLEDeviceUP,
         sendDataToBLEDeviceDOWN,
+        sendDataToBLEDeviceRESET,
     } = useBLE();
 
 
@@ -34,14 +35,6 @@ const BleWindow2 = () => {
     return (
         <SafeAreaView>
             <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
-            {/* <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-                <Text>
-                    Dispositivo !
-                </Text>
-                <TouchableOpacity onPress={() => { console.log('teste') }}>
-                    <Image style={{ width: 30, height: 30 }} source={require('../../assets/ble_48px.png')} />
-                </TouchableOpacity>
-            </View> */}
             {
                 allDevices.length > 0 &&
                 (
@@ -65,29 +58,22 @@ const BleWindow2 = () => {
                     />
                 )
             }
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                <TouchableOpacity style={styles.buttonConect} onPress={scanForPeripherals}>
-                    <Text style={styles.textConnect}>
-                        Scan
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonConect} onPress={disconnectFromDevice}>
-                    <Text style={styles.textConnect}>
-                        StopScan
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <TouchableOpacity style={{ marginLeft: 20, marginTop: 18 }} onPress={() => sendDataToBLEDeviceUP('54 46 57 44 01 01 C9')}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 120, marginHorizontal: 50 }}>
+                <TouchableOpacity style={[styles.cmdButton, { backgroundColor: "#94bc1c"}]} onPress={() => sendDataToBLEDeviceUP('54 46 57 44 01 01 C9')}>
                     <Text style={{ fontSize: 20 }}>
                         UP
                     </Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={{ marginRight: 20, marginTop: 18 }} onPress={() => sendDataToBLEDeviceDOWN('teste')}>
+                <TouchableOpacity style={[styles.cmdButton, { backgroundColor: "#94bc1c"}]} onPress={() => sendDataToBLEDeviceDOWN('teste')}>
                     <Text style={{ fontSize: 20 }}>
                         DOWN
+                    </Text>
+                </TouchableOpacity>
+            </View>
+            <View style={{padding:10, marginTop: 20, marginHorizontal: 50 }}>
+            <TouchableOpacity style={[styles.cmdButton, { backgroundColor: "#F44235"}]} onPress={() => sendDataToBLEDeviceRESET('teste')}>
+                    <Text style={{ fontSize: 20, alignSelf: 'center' }}>
+                        RESET
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -96,14 +82,7 @@ const BleWindow2 = () => {
                 <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 18, alignSelf: 'center' }}>
                     {connectedDevice ? `Conectado em ${connectedDevice.id}` : 'No device connected'}
                 </Text>
-            </View>
-
-            {/* <TouchableOpacity style={styles.disconnectButton} onPress={disconnectFromDevice}>
-                <Text style={{ fontSize: 20, alignSelf: 'center' }}>
-                    Disconnect
-                </Text>
-            </TouchableOpacity> */}
-
+            </View>          
         </SafeAreaView>
     )
 }
@@ -163,6 +142,11 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         height: 50,
         backgroundColor: 'red'
-    }
+    },
+    cmdButton: { marginRight: 20, 
+        marginTop: 18, 
+        padding: 10, 
+        borderRadius: 10 
+    },
 
 })

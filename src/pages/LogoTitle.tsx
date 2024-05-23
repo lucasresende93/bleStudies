@@ -3,7 +3,7 @@ import { useState, useContext } from 'react';
 import { Image, TouchableOpacity, View, Text, StyleSheet, Modal, FlatList } from 'react-native';
 import useBLE from '../../useBLE';
 import { BluetoothContext } from '../context/Bluetoothcontext'; // Importar o contexto
-import { Device } from 'react-native-ble-plx';
+import { BleManager, Device } from 'react-native-ble-plx';
 
 const LogoTitle = () => {
   const {
@@ -22,7 +22,7 @@ const LogoTitle = () => {
     throw new Error('LogoTitle must be used within a BluetoothProvider');
   }
 
-  const { connectedDevice, setConnectedDevice } = bluetoothContext; // Usar o contexto
+  const { bleManager, connectedDevice, setConnectedDevice } = bluetoothContext; // Usar o contexto
 
   const scanForDevices = async () => {
     const isPermissionsEnabled = await requestPermissions();
@@ -38,6 +38,11 @@ const LogoTitle = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
 
+  const handleCloseModal = () => {   
+    bleManager.stopDeviceScan(); 
+    setModalVisible(!modalVisible);
+  };
+
   return (
     <View style={styles.headerStack}>
       <Modal
@@ -50,7 +55,7 @@ const LogoTitle = () => {
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text>Dispositivos Encontrados</Text>
+            <Text>Dispositivos Encontrados:{"\n"}</Text>
             <View style={{ marginTop: 5, width: '50%' }}>
               {allDevices.length > 0 && (
                 <FlatList
@@ -58,9 +63,14 @@ const LogoTitle = () => {
                   keyExtractor={(item) => item.id} // Use the device ID as the key
                   renderItem={({ item }) => (
                     <TouchableOpacity onPress={() => handleDeviceSelect(item)}>
-                      <View>
-                        <Text style={{ fontWeight: 'bold', fontStyle: 'italic' }}>{item.name}</Text>
-                        <Text>{item.id}</Text>
+                      <View  style={styles.itemContainer}>
+
+                        <Text style={{ fontWeight: 'bold', fontStyle: 'italic'}}>
+                          {item.name} 
+                          </Text>   
+                          <Text>
+                            {item.id}</Text>                  
+
                       </View>
                     </TouchableOpacity>
                   )}
@@ -69,7 +79,7 @@ const LogoTitle = () => {
               {/*#f44235 cor do botao de fechar  */}
               <TouchableOpacity
                 style={[styles.button, { backgroundColor: connectedDevice ? '#f44235' : 'gray', marginBottom: 2, marginTop: 50 }]}
-                onPress={() => setModalVisible(!modalVisible)}>
+                onPress={handleCloseModal}>
                 <Text style={{ alignSelf: 'center' }}>Fechar</Text>
               </TouchableOpacity>
             </View>
@@ -105,7 +115,6 @@ const styles = StyleSheet.create({
         marginTop: 22,
     },
     modalView: {
-        margin: 20,
         backgroundColor: 'white',
         borderRadius: 20,
         padding: 35,
@@ -120,6 +129,24 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         padding: 10,
         elevation: 2,
+    },
+    itemContainer: {
+      
+    padding: 12,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    alignContent: 'center',
+    alignSelf: 'center',
+    width: '100%',
+    backgroundColor: '#D6E3ED',
+    borderRadius: 10,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
     },
 
 })
