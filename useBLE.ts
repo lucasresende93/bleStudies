@@ -16,6 +16,7 @@ interface BluetoothLowEnergyApi {
   sendDataToBLEDeviceUP: (data: string) => void;
   sendDataToBLEDeviceDOWN: (data: string) => void;
   sendDataToBLEDeviceRESET: (data: string) => void;
+  sendDataToBLEDeviceSPEED: (data: string) => void;
   connectedDevice: Device | null;
   allDevices: Device[];
   heartRate: number;
@@ -159,6 +160,17 @@ function useBLE(): BluetoothLowEnergyApi {
       console.log('Error', `Failed to send data: ${error.message}`);
     }
   };
+  const sendDataToBLEDeviceSPEED = async (data: string) => {
+    try {
+      const dataAsBytes = base64.encode('TFWR»');
+      if (connectedDevice) {
+        await bleManager.writeCharacteristicWithoutResponseForDevice(connectedDevice.id, SERVICE_UUID, CHARACTERISTIC_WRITE_UUID, dataAsBytes);
+        console.log('Success', 'Data sent successfully');
+      }
+    } catch (error: any) {
+      console.log('Error', `Failed to send data: ${error.message}`);
+    }
+  };
 
   return {
     requestPermissions,
@@ -168,6 +180,7 @@ function useBLE(): BluetoothLowEnergyApi {
     sendDataToBLEDeviceUP,
     sendDataToBLEDeviceDOWN,
     sendDataToBLEDeviceRESET,
+    sendDataToBLEDeviceSPEED,
     connectedDevice,
     allDevices,
     heartRate,

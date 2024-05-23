@@ -1,6 +1,8 @@
 import React, { useEffect, useInsertionEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, StatusBar, FlatList, View, Alert, StyleSheet, TouchableOpacity, Image } from 'react-native'
+import * as Location from 'expo-location'
+
 
 import base64 from 'react-native-base64'
 import useBLE from "../../useBLE";
@@ -9,6 +11,39 @@ const SERVICE_UUID = "0000fff0-0000-1000-8000-00805f9b34fb"; //"0xFFF0" 0000fff0
 const CHARACTERISTIC_WRITE_UUID = "0000fff2-0000-1000-8000-00805f9b34fb"; // 0xFFF2 0000fff2-0000-1000-8000-00805f9b34fb
 
 const BleWindow2 = () => {
+
+    const [location, setLocation] = useState<Location.LocationObject | null>(null);
+
+
+
+
+    useEffect(() => {
+        const getPermissions = async () => {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                console.log('Please grant location permissions');
+                Alert.alert('Permission to access location was denied');
+                return;
+            }
+            let location = await Location.getCurrentPositionAsync({});
+            setLocation(location);
+        };
+        getPermissions();
+    }, []);
+
+    useEffect(() => {
+        Location.watchPositionAsync({
+            accuracy: Location.LocationAccuracy.Highest,
+            timeInterval: 500,
+            distanceInterval: 1
+        }, (response) => {
+            setLocation(response);
+            sendDataToBLEDeviceSPEED('TESTE');
+            console.log('New Location', response);
+        })
+    }, []);
+
+
     const {
         requestPermissions,
         scanForPeripherals,
@@ -20,6 +55,7 @@ const BleWindow2 = () => {
         sendDataToBLEDeviceUP,
         sendDataToBLEDeviceDOWN,
         sendDataToBLEDeviceRESET,
+        sendDataToBLEDeviceSPEED,
     } = useBLE();
 
 
@@ -33,57 +69,51 @@ const BleWindow2 = () => {
     // }
 
     return (
-        <SafeAreaView>
-            <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
-            {
-                allDevices.length > 0 &&
-                (
-                    <FlatList
-                        data={allDevices}
-                        keyExtractor={(item) => item.id} // Use the device ID as the key
-                        renderItem={({ item }) => (
-
-                            <TouchableOpacity onPress={() => { connectToDevice(item) }}>
-                                <View style={{ marginRight: 10, marginLeft: 10, padding: 10, backgroundColor: '#D6E3ED', borderRadius: 5, marginTop: 10 }}>
-                                    <Text style={{ fontWeight: 'bold', fontStyle: 'italic' }}>
-                                        {item.name}
-                                    </Text>
-                                    <Text>
-                                        {item.id}
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-
-                        )}
-                    />
-                )
-            }
-            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 120, marginHorizontal: 50 }}>
-                <TouchableOpacity style={[styles.cmdButton, { backgroundColor: "#94bc1c"}]} onPress={() => sendDataToBLEDeviceUP('54 46 57 44 01 01 C9')}>
+        <View style={{ backgroundColor: '#D3D3D3', marginTop: 0 }}>
+            <SafeAreaView>
+                <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+                <View style={{ alignItems: 'center', marginTop: 30 }}>
                     <Text style={{ fontSize: 20 }}>
-                        UP
+                        VELOCIDADE
                     </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.cmdButton, { backgroundColor: "#94bc1c"}]} onPress={() => sendDataToBLEDeviceDOWN('teste')}>
-                    <Text style={{ fontSize: 20 }}>
-                        DOWN
-                    </Text>
-                </TouchableOpacity>
-            </View>
-            <View style={{padding:10, marginTop: 20, marginHorizontal: 50 }}>
-            <TouchableOpacity style={[styles.cmdButton, { backgroundColor: "#F44235"}]} onPress={() => sendDataToBLEDeviceRESET('teste')}>
-                    <Text style={{ fontSize: 20, alignSelf: 'center' }}>
-                        RESET
-                    </Text>
-                </TouchableOpacity>
-            </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                        <Text style={{ fontSize: 68 }}>
+                            {location?.coords.speed ? parseFloat(((+location.coords.speed * 3.6) + 2).toFixed(2)) : 0}
+                        </Text>
+                        <Text>
+                            km/h
+                        </Text>
+                    </View>
+                </View>
 
-            <View style={{ padding: 10, backgroundColor: connectedDevice ? '#B2EDAB' : 'gray', borderRadius: 5, marginTop: 200 }}>
-                <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 18, alignSelf: 'center' }}>
-                    {connectedDevice ? `Conectado em ${connectedDevice.id}` : 'No device connected'}
-                </Text>
-            </View>          
-        </SafeAreaView>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 150, marginHorizontal: 50, alignItems: 'center' }}>
+                    <TouchableOpacity style={[styles.cmdButton, { backgroundColor: "#94bc1c" }]} onPress={() => sendDataToBLEDeviceUP('54 46 57 44 01 01 C9')}>
+                        <Text style={{ fontSize: 20 }}>
+                            UP
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.cmdButton, { backgroundColor: "#94bc1c" }]} onPress={() => sendDataToBLEDeviceDOWN('teste')}>
+                        <Text style={{ fontSize: 20 }}>
+                            DOWN
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={{ padding: 10, marginTop: 20, marginHorizontal: 50 }}>
+                    <TouchableOpacity style={[styles.cmdButton, { backgroundColor: "#cd5c5c" }]} onPress={() => sendDataToBLEDeviceRESET('teste')}>
+                        <Text style={{ fontSize: 20, alignSelf: 'center' }}>
+                            RESET ⚠️
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={{ padding: 10, backgroundColor: connectedDevice ? '#B2EDAB' : 'gray', borderRadius: 5, marginHorizontal: 50, marginTop: 130 }}>
+                    <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 18, alignSelf: 'center' }}>
+                        {connectedDevice ? `Conectado em ${connectedDevice.id}` : 'No device connected'}
+                    </Text>
+                </View>
+            </SafeAreaView>
+        </View>
     )
 }
 
@@ -143,10 +173,10 @@ const styles = StyleSheet.create({
         height: 50,
         backgroundColor: 'red'
     },
-    cmdButton: { marginRight: 20, 
-        marginTop: 18, 
-        padding: 10, 
-        borderRadius: 10 
+    cmdButton: {
+        marginHorizontal: 5,
+        padding: 10,
+        borderRadius: 10
     },
 
 })
